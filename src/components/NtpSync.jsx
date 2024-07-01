@@ -4,11 +4,17 @@ const LiveTime = () => {
   const [time, setTime] = useState("");
 
   const fetchTime = async () => {
-    const response = await fetch(
-      "http://worldtimeapi.org/api/timezone/Etc/UTC"
-    );
-    const data = await response.json();
-    setTime(new Date(data.datetime).toLocaleTimeString());
+    try {
+      const response = await fetch("http://worldtimeapi.org/api/timezone/Etc/UTC");
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+      setTime(new Date(data.datetime).toLocaleTimeString());
+    } catch (error) {
+      console.error("Error fetching time:", error);
+      setTime("Error fetching time");
+    }
   };
 
   useEffect(() => {
@@ -25,20 +31,9 @@ const LiveTime = () => {
   );
 };
 
-const Form = ({
-  server,
-  setServer,
-  syncTime,
-  setSyncTime,
-  bias,
-  setBias,
-  handleSubmit,
-}) => {
+const Form = ({ server, setServer, syncTime, setSyncTime, bias, setBias, handleSubmit }) => {
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-4 bg-white p-6 rounded shadow-md mt-6 m-5"
-    >
+    <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded shadow-md mt-6 m-5">
       <div>
         <label className="block text-gray-700 font-medium">Server:</label>
         <input
@@ -49,9 +44,7 @@ const Form = ({
         />
       </div>
       <div>
-        <label className="block text-gray-700 font-medium">
-          Sync Time (minutes):
-        </label>
+        <label className="block text-gray-700 font-medium">Sync Time (minutes):</label>
         <input
           type="text"
           value={syncTime}
@@ -60,9 +53,7 @@ const Form = ({
         />
       </div>
       <div>
-        <label className="block text-gray-700 font-medium">
-          Bias (seconds):
-        </label>
+        <label className="block text-gray-700 font-medium">Bias (seconds):</label>
         <input
           type="text"
           value={bias}
@@ -70,10 +61,7 @@ const Form = ({
           className="mt-1 p-2 border border-gray-300 rounded w-full"
         />
       </div>
-      <button
-        type="submit"
-        className="bg-blue-500 text-white p-2 rounded shadow"
-      >
+      <button type="submit" className="bg-blue-500 text-white p-2 rounded shadow">
         Sync
       </button>
     </form>
@@ -102,9 +90,7 @@ const LogsTable = ({ logEntries }) => (
       <tbody className="bg-white divide-y divide-gray-200">
         {logEntries.map((entry, index) => (
           <tr key={index}>
-            <td className="px-6 py-4 whitespace-nowrap">{`NTD ${
-              index + 1
-            }`}</td>
+            <td className="px-6 py-4 whitespace-nowrap">{`NTD ${index + 1}`}</td>
             <td className="px-6 py-4 whitespace-nowrap">{entry.ip}</td>
             <td className="px-6 py-4 whitespace-nowrap">{entry.timestamp}</td>
             <td
@@ -155,16 +141,24 @@ const NtpSync = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const csrfToken = getCookie("csrftoken");
-    await fetch("https://npl-clocks-1.onrender.com/sync/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": csrfToken,
-      },
-      body: JSON.stringify({ server, sync_time: syncTime, bias }),
-    });
-    fetchLogs();
+    try {
+      const response = await fetch("https://npl-clocks-1.onrender.com/sync/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+        body: JSON.stringify({ server, sync_time: syncTime, bias }),
+      });
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      fetchLogs();
+    } catch (error) {
+      console.error("Error submitting sync request:", error);
+    }
   };
+
   function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
