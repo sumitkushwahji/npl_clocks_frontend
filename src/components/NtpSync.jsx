@@ -5,7 +5,7 @@ const LiveTime = () => {
 
   const fetchTime = async () => {
     try {
-      const response = await fetch("http://worldtimeapi.org/api/timezone/Etc/UTC");
+      const response = await fetch("https://worldtimeapi.org/api/timezone/Etc/UTC");
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
