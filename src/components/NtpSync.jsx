@@ -135,7 +135,7 @@ const NtpSync = () => {
 
   const fetchLogs = async () => {
     try {
-      const response = await fetch("http://localhost:8000/logs/");
+      const response = await fetch("https://npl-clocks-1.onrender.com/logs/");
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -155,7 +155,7 @@ const NtpSync = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const csrfToken = getCookie("csrftoken");
-    await fetch("http://localhost:8000/sync/", {
+    await fetch("https://npl-clocks-1.onrender.com/sync/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
